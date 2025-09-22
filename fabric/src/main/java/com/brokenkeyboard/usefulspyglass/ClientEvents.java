@@ -20,7 +20,14 @@ public final class ClientEvents implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ForgeConfigRegistry.INSTANCE.register(ModRegistry.MOD_ID, ModConfig.Type.CLIENT, ClientConfig.SPEC);
-        ClientTickEvents.END_CLIENT_TICK.register(ClientHandler::handleClientTick);
+        ClientTickEvents.END_CLIENT_TICK.register((minecraft) -> {
+            if (ClientHandler.HAS_SHOULDER_SURFING == null) {
+                ClientHandler.HAS_SHOULDER_SURFING = FabricLoader.getInstance().isModLoaded("shouldersurfing");
+                ClientHandler.SHOULDER_SURFING_PICK_FUNCTION = UsefulSpyglass::shoulderSurfingPick;
+            }
+
+            ClientHandler.handleClientTick(minecraft);
+        });
         EntityRendererRegistry.register(ModRegistry.SPOTTER_EYE, context -> new ThrownItemRenderer<>(context, 1.0F, true));
 
         HudRenderCallback.EVENT.register((graphics, tickDelta) -> {

@@ -3,13 +3,19 @@ package com.brokenkeyboard.usefulspyglass;
 import com.brokenkeyboard.usefulspyglass.config.CommonConfig;
 import com.brokenkeyboard.usefulspyglass.handler.ServerHandler;
 import com.brokenkeyboard.usefulspyglass.network.packet.SpyglassEnchPacket;
+import com.github.exopandora.shouldersurfing.api.client.IShoulderSurfing;
+import com.github.exopandora.shouldersurfing.api.client.ShoulderSurfing;
+import com.github.exopandora.shouldersurfing.api.model.PickContext;
 import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.fml.config.ModConfig;
 
 import java.util.function.BiConsumer;
@@ -28,5 +34,16 @@ public class UsefulSpyglass implements ModInitializer {
 
     private static <T> BiConsumer<ResourceLocation, T> bind(Registry<? super T> registry) {
         return (location, t) -> Registry.register(registry, location, t);
+    }
+
+    public static HitResult shoulderSurfingPick(Camera camera, double interactionRange, float partialTick, MultiPlayerGameMode gameMode) {
+        IShoulderSurfing instance = ShoulderSurfing.getInstance();
+        if (instance.isShoulderSurfing()) {
+            PickContext pickContext = new PickContext.Builder(camera).build();
+
+            return instance.getObjectPicker().pick(pickContext, interactionRange, partialTick, gameMode);
+        }
+
+        return null;
     }
 }

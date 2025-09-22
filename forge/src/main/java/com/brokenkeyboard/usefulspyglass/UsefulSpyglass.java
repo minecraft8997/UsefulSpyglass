@@ -4,7 +4,12 @@ import com.brokenkeyboard.usefulspyglass.config.ClientConfig;
 import com.brokenkeyboard.usefulspyglass.config.CommonConfig;
 import com.brokenkeyboard.usefulspyglass.handler.ClientHandler;
 import com.brokenkeyboard.usefulspyglass.network.PacketHandler;
+import com.github.exopandora.shouldersurfing.api.client.IShoulderSurfing;
+import com.github.exopandora.shouldersurfing.api.client.ShoulderSurfing;
+import com.github.exopandora.shouldersurfing.api.model.PickContext;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -14,6 +19,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
@@ -106,6 +112,11 @@ public class UsefulSpyglass {
         @SubscribeEvent
         public static void onClientTick(TickEvent.ClientTickEvent event) {
             if (event.phase != TickEvent.Phase.END) return;
+            if (ClientHandler.HAS_SHOULDER_SURFING == null) {
+                ClientHandler.HAS_SHOULDER_SURFING = ModList.get().isLoaded("shouldersurfing");
+                ClientHandler.SHOULDER_SURFING_PICK_FUNCTION = UsefulSpyglass::shoulderSurfingPick;
+            }
+
             ClientHandler.handleClientTick(Minecraft.getInstance());
         }
     }
@@ -113,5 +124,16 @@ public class UsefulSpyglass {
     public static <T> void register(ResourceKey<Registry<T>> registry, Consumer<BiConsumer<ResourceLocation, T>> source) {
         FMLJavaModLoadingContext.get().getModEventBus().addListener((RegisterEvent event) ->
                 source.accept(((location, t) -> event.register(registry, location, () -> t))));
+    }
+
+    public static HitResult shoulderSurfingPick(Camera camera, double interactionRange, float partialTick, MultiPlayerGameMode gameMode) {
+        IShoulderSurfing instance = ShoulderSurfing.getInstance();
+        if (instance.isShoulderSurfing()) {
+            PickContext pickContext = new PickContext.Builder(camera).build();
+
+            return instance.getObjectPicker().pick(pickContext, interactionRange, partialTick, gameMode);
+        }
+
+        return null;
     }
 }
