@@ -36,6 +36,9 @@ public class UsefulSpyglass implements ModInitializer {
         return (location, t) -> Registry.register(registry, location, t);
     }
 
+    /*
+     * Thanks to Exopandora: https://github.com/Exopandora/ShoulderSurfing/issues/314#issuecomment-2977251623
+     */
     public static HitResult shoulderSurfingPick(Camera camera, double interactionRange, float partialTick, MultiPlayerGameMode gameMode) {
         IShoulderSurfing instance = ShoulderSurfing.getInstance();
         if (instance.isShoulderSurfing()) {
