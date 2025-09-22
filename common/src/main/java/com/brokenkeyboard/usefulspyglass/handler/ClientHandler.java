@@ -10,6 +10,9 @@ import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.AirBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
 public class ClientHandler {
@@ -31,6 +34,11 @@ public class ClientHandler {
             }
             if (result == null) {
                 result = EntityFinder.getAimedObject(player.level(), cameraEntity, camera.getPosition(), cameraEntity.getViewVector(client.getFrameTimeNs()));
+            }
+            if (result instanceof BlockHitResult blockHit && client.player != null &&
+                    client.player.level().getBlockState(blockHit.getBlockPos()).getBlock() instanceof AirBlock
+            ) {
+                result = null;
             }
             InfoOverlay.setHitResult(result);
             if (!player.getCooldowns().isOnCooldown(Items.SPYGLASS) && client.options.keyAttack.isDown()
